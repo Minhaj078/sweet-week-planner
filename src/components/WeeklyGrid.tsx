@@ -2,6 +2,13 @@ import { motion } from 'framer-motion';
 import { Trash2 } from 'lucide-react';
 import { TimeSlot, DAYS } from '@/types/planner';
 import { TaskCell } from './TaskCell';
+import catOrange from '@/assets/cat-orange.png';
+import catGray from '@/assets/cat-gray.png';
+import catCalico from '@/assets/cat-calico.png';
+import catWhite from '@/assets/cat-white.png';
+import couple from '@/assets/couple.png';
+
+const catImages = [catOrange, catGray, catCalico, catWhite];
 
 interface Props {
   slots: TimeSlot[];
@@ -13,70 +20,104 @@ interface Props {
 
 export function WeeklyGrid({ slots, getTask, onSetTask, onCycleStatus, onRemoveSlot }: Props) {
   return (
-    <div className="px-2 md:px-4 pb-24 overflow-x-auto">
-      <div className="min-w-[600px]">
-        {/* Day headers */}
-        <div className="grid grid-cols-[100px_repeat(7,1fr)] gap-1.5 mb-2 sticky top-0 z-10 bg-background/80 backdrop-blur-sm py-2">
-          <div />
-          {DAYS.map((day, i) => (
-            <div key={day} className="text-center">
-              <span className={`text-[11px] md:text-xs font-bold font-display ${
-                i === 0 || i === 6 ? 'text-primary' : 'text-foreground'
-              }`}>
-                {day}
-              </span>
-            </div>
+    <div className="px-2 md:px-4 pb-28">
+      <div className="relative bg-grid-bg rounded-2xl border-2 border-border overflow-hidden shadow-soft">
+        {/* Cat decorations on left side */}
+        <div className="absolute left-0 top-0 bottom-0 w-0 pointer-events-none z-10 hidden md:block">
+          {slots.map((_, i) => (
+            i % 3 === 0 && (
+              <img
+                key={i}
+                src={catImages[Math.floor(i / 3) % catImages.length]}
+                alt=""
+                className="absolute w-10 h-10"
+                style={{ top: `${52 + i * 37}px`, left: '-4px' }}
+                loading="lazy"
+              />
+            )
           ))}
         </div>
 
-        {/* Rows */}
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[560px] border-collapse">
+            {/* Day headers */}
+            <thead>
+              <tr>
+                <th className="w-[85px] md:w-[100px] p-2 bg-grid-bg" />
+                {DAYS.map((day, i) => (
+                  <th
+                    key={day}
+                    className="p-2 bg-grid-header text-center border border-border/50"
+                  >
+                    <span className={`font-handwritten text-sm md:text-base font-bold ${
+                      i === 5 ? 'text-primary text-lg' : 'text-foreground'
+                    }`}>
+                      {day}
+                    </span>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+
+            <tbody>
+              {slots.map((slot, rowIdx) => (
+                <motion.tr
+                  key={slot.id}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: rowIdx * 0.02 }}
+                >
+                  <td className="p-1 pr-2 border border-border/50 bg-grid-bg">
+                    <div className="flex items-center justify-between">
+                      <span className="font-handwritten text-xs md:text-sm font-bold text-foreground whitespace-nowrap">
+                        {slot.label}
+                      </span>
+                      <button
+                        onClick={() => onRemoveSlot(slot.id)}
+                        className="text-muted-foreground/30 hover:text-destructive transition-colors ml-1 shrink-0"
+                      >
+                        <Trash2 size={10} />
+                      </button>
+                    </div>
+                  </td>
+                  {DAYS.map((_, dayIdx) => (
+                    <td key={dayIdx} className="p-0 border border-border/50">
+                      <TaskCell
+                        task={getTask(slot.id, dayIdx)}
+                        onSetTask={(text) => onSetTask(slot.id, dayIdx, text)}
+                        onCycleStatus={() => onCycleStatus(slot.id, dayIdx)}
+                        isAlt={rowIdx % 2 === 1}
+                      />
+                    </td>
+                  ))}
+                </motion.tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
         {slots.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-16 text-muted-foreground font-body"
-          >
+          <div className="text-center py-16 text-muted-foreground font-body">
             <p className="text-4xl mb-3">🌸</p>
             <p className="text-sm">No time slots yet. Tap + to add one!</p>
-          </motion.div>
+          </div>
         )}
+      </div>
 
-        {slots.map((slot, idx) => (
-          <motion.div
-            key={slot.id}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: idx * 0.05 }}
-            className="grid grid-cols-[100px_repeat(7,1fr)] gap-1.5 mb-1.5"
-          >
-            <div className="flex items-center gap-1 pr-1">
-              <div className="flex-1 min-w-0">
-                <p className="text-[11px] font-bold font-display text-foreground truncate">{slot.label}</p>
-                <p className="text-[9px] text-muted-foreground font-body">{slot.startTime}–{slot.endTime}</p>
-              </div>
-              <button
-                onClick={() => onRemoveSlot(slot.id)}
-                className="text-muted-foreground/40 hover:text-destructive transition-colors shrink-0 p-0.5"
-              >
-                <Trash2 size={12} />
-              </button>
-            </div>
-
-            {DAYS.map((_, dayIdx) => (
-              <TaskCell
-                key={dayIdx}
-                task={getTask(slot.id, dayIdx)}
-                onSetTask={(text) => onSetTask(slot.id, dayIdx, text)}
-                onCycleStatus={() => onCycleStatus(slot.id, dayIdx)}
-              />
-            ))}
-          </motion.div>
-        ))}
+      {/* Bottom quotes and couple illustration */}
+      <div className="flex items-center justify-center gap-4 mt-6 flex-wrap">
+        <span className="font-handwritten text-primary text-lg md:text-xl font-bold">
+          Choose to love daily 💕
+        </span>
+        <img src={couple} alt="" className="w-16 h-16 md:w-20 md:h-20 animate-float" loading="lazy" />
+        <span className="font-handwritten text-primary text-lg md:text-xl font-bold">
+          Grow up with me 💗
+        </span>
       </div>
 
       {/* Legend */}
-      <div className="flex items-center justify-center gap-4 mt-6 text-[10px] font-body text-muted-foreground">
-        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-cream border border-border" /> Pending</span>
+      <div className="flex items-center justify-center gap-4 mt-4 text-[10px] font-body text-muted-foreground">
+        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-grid-cell border border-border/50" /> Pending</span>
         <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-mint" /> Done</span>
         <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-soft-red" /> Missed</span>
       </div>

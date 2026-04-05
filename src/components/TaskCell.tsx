@@ -7,20 +7,16 @@ interface Props {
   task?: PlannerTask;
   onSetTask: (text: string) => void;
   onCycleStatus: () => void;
+  isAlt: boolean;
 }
 
-const statusStyles: Record<string, string> = {
-  pending: 'bg-cream border-border',
-  completed: 'bg-mint border-mint',
-  missed: 'bg-soft-red border-soft-red',
+const statusBg: Record<string, string> = {
+  pending: '',
+  completed: 'bg-mint',
+  missed: 'bg-soft-red',
 };
 
-const statusIcons: Record<string, React.ReactNode> = {
-  completed: <Check size={10} className="text-accent-foreground" />,
-  missed: <XIcon size={10} className="text-destructive" />,
-};
-
-export function TaskCell({ task, onSetTask, onCycleStatus }: Props) {
+export function TaskCell({ task, onSetTask, onCycleStatus, isAlt }: Props) {
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState(task?.text || '');
 
@@ -39,25 +35,23 @@ export function TaskCell({ task, onSetTask, onCycleStatus }: Props) {
   };
 
   const status = task?.status || 'pending';
+  const baseBg = status === 'pending' ? (isAlt ? 'bg-grid-cell-alt' : 'bg-grid-cell') : statusBg[status];
 
   return (
     <>
       <motion.button
-        whileTap={{ scale: 0.95 }}
+        whileTap={{ scale: 0.93 }}
         onClick={handleClick}
         onDoubleClick={() => { setEditing(true); setText(task?.text || ''); }}
-        className={`w-full min-h-[44px] rounded-xl border text-[10px] md:text-xs p-1.5 font-body leading-tight transition-colors duration-200 ${statusStyles[status]} ${
-          task?.text ? 'cursor-pointer' : 'cursor-pointer hover:bg-blush/40'
-        }`}
+        className={`w-full h-full min-h-[36px] border border-border/50 text-[9px] md:text-[11px] font-body leading-tight transition-colors duration-200 ${baseBg} hover:brightness-95`}
       >
         {task?.text ? (
-          <span className="flex items-center gap-0.5 justify-center flex-wrap">
-            {statusIcons[status]}
-            <span className="truncate max-w-full">{task.text}</span>
+          <span className="flex items-center gap-0.5 justify-center px-0.5">
+            {status === 'completed' && <Check size={8} className="text-accent-foreground shrink-0" />}
+            {status === 'missed' && <XIcon size={8} className="text-destructive shrink-0" />}
+            <span className="truncate">{task.text}</span>
           </span>
-        ) : (
-          <span className="text-muted-foreground/50">+</span>
-        )}
+        ) : null}
       </motion.button>
 
       <AnimatePresence>
@@ -74,9 +68,9 @@ export function TaskCell({ task, onSetTask, onCycleStatus }: Props) {
               animate={{ scale: 1 }}
               exit={{ scale: 0.9 }}
               onClick={e => e.stopPropagation()}
-              className="bg-card rounded-2xl shadow-soft p-5 w-full max-w-xs"
+              className="bg-popover rounded-2xl shadow-soft p-5 w-full max-w-xs border border-border"
             >
-              <h4 className="font-display font-bold text-sm mb-3 text-foreground">📝 What's planned?</h4>
+              <h4 className="font-handwritten font-bold text-lg mb-3 text-primary">📝 What's planned?</h4>
               <input
                 autoFocus
                 value={text}
@@ -86,10 +80,10 @@ export function TaskCell({ task, onSetTask, onCycleStatus }: Props) {
                 className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-sm font-body text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/30 mb-3"
               />
               <div className="flex gap-2">
-                <button onClick={handleSave} className="flex-1 bg-primary text-primary-foreground rounded-xl py-2 text-sm font-semibold font-body hover:opacity-90 transition-opacity">
+                <button onClick={handleSave} className="flex-1 bg-primary text-primary-foreground rounded-xl py-2 text-sm font-bold font-handwritten hover:opacity-90 transition-opacity">
                   Save ✨
                 </button>
-                <button onClick={() => setEditing(false)} className="flex-1 bg-muted text-muted-foreground rounded-xl py-2 text-sm font-semibold font-body hover:bg-border transition-colors">
+                <button onClick={() => setEditing(false)} className="flex-1 bg-muted text-muted-foreground rounded-xl py-2 text-sm font-bold font-handwritten hover:bg-border transition-colors">
                   Cancel
                 </button>
               </div>

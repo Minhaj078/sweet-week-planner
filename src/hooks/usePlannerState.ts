@@ -1,20 +1,15 @@
 import { useState, useCallback } from 'react';
-import { TimeSlot, PlannerTask, PlannerView, TaskStatus } from '@/types/planner';
+import { TimeSlot, PlannerTask, PlannerView, TaskStatus, DEFAULT_TIME_SLOTS } from '@/types/planner';
 
 const generateId = () => Math.random().toString(36).substring(2, 9);
 
-const DEFAULT_SLOTS: TimeSlot[] = [
-  { id: generateId(), label: 'Morning', startTime: '08:00', endTime: '10:00' },
-  { id: generateId(), label: 'Midday', startTime: '10:00', endTime: '12:00' },
-  { id: generateId(), label: 'Afternoon', startTime: '14:00', endTime: '16:00' },
-  { id: generateId(), label: 'Evening', startTime: '18:00', endTime: '20:00' },
-];
+const makeSlots = (): TimeSlot[] => DEFAULT_TIME_SLOTS.map(s => ({ ...s, id: generateId() }));
 
 export function usePlannerState() {
   const [view, setView] = useState<PlannerView>('my');
   const [timeSlots, setTimeSlots] = useState<Record<PlannerView, TimeSlot[]>>({
-    my: DEFAULT_SLOTS,
-    partner: DEFAULT_SLOTS.map(s => ({ ...s, id: generateId() })),
+    my: makeSlots(),
+    partner: makeSlots(),
   });
   const [tasks, setTasks] = useState<Record<PlannerView, PlannerTask[]>>({
     my: [],
@@ -24,8 +19,8 @@ export function usePlannerState() {
   const slots = timeSlots[view];
   const currentTasks = tasks[view];
 
-  const addTimeSlot = useCallback((label: string, startTime: string, endTime: string) => {
-    const slot: TimeSlot = { id: generateId(), label, startTime, endTime };
+  const addTimeSlot = useCallback((label: string) => {
+    const slot: TimeSlot = { id: generateId(), label };
     setTimeSlots(prev => ({ ...prev, [view]: [...prev[view], slot] }));
   }, [view]);
 

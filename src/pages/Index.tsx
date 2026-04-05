@@ -27,10 +27,9 @@ const Index = () => {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setShowAddSlot(true)}
-        className="fixed bottom-6 right-6 bg-primary text-primary-foreground rounded-2xl shadow-soft px-5 py-3 flex items-center gap-2 font-display font-bold text-sm z-40 hover:opacity-90 transition-opacity"
+        className="fixed bottom-6 right-6 bg-primary text-primary-foreground rounded-full shadow-soft w-14 h-14 flex items-center justify-center font-display font-bold text-sm z-40 hover:opacity-90 transition-opacity"
       >
-        <Plus size={18} />
-        Add Time Slot
+        <Plus size={24} />
       </motion.button>
 
       <AddTimeSlotModal
