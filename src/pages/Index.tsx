@@ -1,16 +1,45 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from 'react';
+import { Plus } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { PlannerHeader } from '@/components/PlannerHeader';
+import { WeeklyGrid } from '@/components/WeeklyGrid';
+import { AddTimeSlotModal } from '@/components/AddTimeSlotModal';
+import { usePlannerState } from '@/hooks/usePlannerState';
 
-// IMPORTANT: Fully REPLACE this with your own code
-const PlaceholderIndex = () => {
-  // PLACEHOLDER: Replace this entire return statement with the user's app.
-  // The inline background color is intentionally not part of the design system.
+const Index = () => {
+  const { view, setView, slots, addTimeSlot, removeTimeSlot, setTask, cycleStatus, getTask } = usePlannerState();
+  const [showAddSlot, setShowAddSlot] = useState(false);
+
   return (
-    <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#fcfbf8' }}>
-      <img data-lovable-blank-page-placeholder="REMOVE_THIS" src="/placeholder.svg" alt="Your app will live here!" />
+    <div className="min-h-screen bg-background">
+      <PlannerHeader view={view} onViewChange={setView} />
+
+      <WeeklyGrid
+        slots={slots}
+        getTask={getTask}
+        onSetTask={setTask}
+        onCycleStatus={cycleStatus}
+        onRemoveSlot={removeTimeSlot}
+      />
+
+      {/* Floating Add Button */}
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => setShowAddSlot(true)}
+        className="fixed bottom-6 right-6 bg-primary text-primary-foreground rounded-2xl shadow-soft px-5 py-3 flex items-center gap-2 font-display font-bold text-sm z-40 hover:opacity-90 transition-opacity"
+      >
+        <Plus size={18} />
+        Add Time Slot
+      </motion.button>
+
+      <AddTimeSlotModal
+        open={showAddSlot}
+        onClose={() => setShowAddSlot(false)}
+        onAdd={addTimeSlot}
+      />
     </div>
   );
 };
-
-const Index = PlaceholderIndex;
 
 export default Index;
