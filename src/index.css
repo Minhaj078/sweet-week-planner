@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Fredoka:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Fredoka:wght@400;500;600;700&family=Patrick+Hand&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,42 +6,44 @@
 
 @layer base {
   :root {
-    --background: 30 50% 97%;
-    --foreground: 350 30% 25%;
+    --background: 45 80% 92%;
+    --foreground: 350 40% 30%;
 
-    --card: 20 40% 96%;
-    --card-foreground: 350 30% 25%;
+    --card: 350 50% 88%;
+    --card-foreground: 350 40% 30%;
 
-    --popover: 30 50% 97%;
-    --popover-foreground: 350 30% 25%;
+    --popover: 45 80% 95%;
+    --popover-foreground: 350 40% 30%;
 
-    --primary: 345 60% 72%;
+    --primary: 345 65% 65%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 25 60% 88%;
-    --secondary-foreground: 350 30% 25%;
+    --secondary: 25 70% 85%;
+    --secondary-foreground: 350 40% 30%;
 
-    --muted: 30 30% 93%;
-    --muted-foreground: 350 15% 50%;
+    --muted: 45 40% 88%;
+    --muted-foreground: 350 20% 50%;
 
-    --accent: 345 40% 90%;
-    --accent-foreground: 345 60% 40%;
+    --accent: 345 50% 85%;
+    --accent-foreground: 345 65% 40%;
 
     --destructive: 0 55% 72%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 30 30% 88%;
-    --input: 30 30% 88%;
-    --ring: 345 60% 72%;
+    --border: 350 40% 82%;
+    --input: 350 30% 85%;
+    --ring: 345 65% 65%;
 
     --radius: 1rem;
 
-    --peach: 20 80% 85%;
-    --cream: 40 50% 95%;
-    --blush: 345 50% 88%;
-    --mint: 150 30% 85%;
+    --grid-bg: 350 55% 86%;
+    --grid-cell: 350 40% 92%;
+    --grid-cell-alt: 350 35% 89%;
+    --grid-header-bg: 350 45% 82%;
+
+    --mint: 150 35% 82%;
     --soft-red: 0 50% 88%;
-    --lavender: 270 30% 90%;
+    --cream: 45 60% 94%;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -54,6 +56,7 @@
 
     --font-display: 'Fredoka', sans-serif;
     --font-body: 'Quicksand', sans-serif;
+    --font-handwritten: 'Patrick Hand', cursive;
   }
 }
 
@@ -74,9 +77,12 @@
 
 @layer utilities {
   .shadow-soft {
-    box-shadow: 0 4px 20px -4px hsl(345 60% 72% / 0.15);
+    box-shadow: 0 4px 20px -4px hsl(345 60% 72% / 0.2);
   }
   .shadow-card {
-    box-shadow: 0 2px 12px -2px hsl(345 60% 72% / 0.1);
+    box-shadow: 0 2px 12px -2px hsl(345 60% 72% / 0.15);
+  }
+  .font-handwritten {
+    font-family: var(--font-handwritten);
   }
 }

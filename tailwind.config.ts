@@ -16,6 +16,7 @@ export default {
       fontFamily: {
         display: ["var(--font-display)", "sans-serif"],
         body: ["var(--font-body)", "sans-serif"],
+        handwritten: ["var(--font-handwritten)", "cursive"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -51,12 +52,13 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        peach: "hsl(var(--peach))",
-        cream: "hsl(var(--cream))",
-        blush: "hsl(var(--blush))",
+        "grid-bg": "hsl(var(--grid-bg))",
+        "grid-cell": "hsl(var(--grid-cell))",
+        "grid-cell-alt": "hsl(var(--grid-cell-alt))",
+        "grid-header": "hsl(var(--grid-header-bg))",
         mint: "hsl(var(--mint))",
         "soft-red": "hsl(var(--soft-red))",
-        lavender: "hsl(var(--lavender))",
+        cream: "hsl(var(--cream))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
