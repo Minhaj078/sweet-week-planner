@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Trash2 } from 'lucide-react';
-import { TimeSlot, DAYS } from '@/types/planner';
+import { DAYS } from '@/types/planner';
 import { TaskCell } from './TaskCell';
 import catOrange from '@/assets/cat-orange.png';
 import catGray from '@/assets/cat-gray.png';
@@ -11,14 +11,14 @@ import couple from '@/assets/couple.png';
 const catImages = [catOrange, catGray, catCalico, catWhite];
 
 interface Props {
-  slots: TimeSlot[];
-  getTask: (slotId: string, day: number) => any;
-  onSetTask: (slotId: string, day: number, text: string) => void;
-  onCycleStatus: (slotId: string, day: number) => void;
-  onRemoveSlot: (id: string) => void;
+  slots: string[];
+  getDayData: (day: string) => any;
+  onSetTask: (day: string, time: string, text: string) => void;
+  onCycleStatus: (day: string, time: string) => void;
+  onRemoveSlot: (time: string) => void;
 }
 
-export function WeeklyGrid({ slots, getTask, onSetTask, onCycleStatus, onRemoveSlot }: Props) {
+export function WeeklyGrid({ slots, getDayData, onSetTask, onCycleStatus, onRemoveSlot }: Props) {
   return (
     <div className="px-2 md:px-4 pb-28">
       <div className="relative bg-grid-bg rounded-2xl border-2 border-border overflow-hidden shadow-soft">
@@ -50,9 +50,9 @@ export function WeeklyGrid({ slots, getTask, onSetTask, onCycleStatus, onRemoveS
                     className="p-2 bg-grid-header text-center border border-border/50"
                   >
                     <span className={`font-handwritten text-sm md:text-base font-bold ${
-                      i === 5 ? 'text-primary text-lg' : 'text-foreground'
+                      i === 0 || i === 6 ? 'text-primary text-lg' : 'text-foreground'
                     }`}>
-                      {day}
+                      {day.substring(0, 3)}
                     </span>
                   </th>
                 ))}
@@ -60,9 +60,9 @@ export function WeeklyGrid({ slots, getTask, onSetTask, onCycleStatus, onRemoveS
             </thead>
 
             <tbody>
-              {slots.map((slot, rowIdx) => (
+              {slots.map((time, rowIdx) => (
                 <motion.tr
-                  key={slot.id}
+                  key={time}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: rowIdx * 0.02 }}
@@ -70,26 +70,30 @@ export function WeeklyGrid({ slots, getTask, onSetTask, onCycleStatus, onRemoveS
                   <td className="p-1 pr-2 border border-border/50 bg-grid-bg">
                     <div className="flex items-center justify-between">
                       <span className="font-handwritten text-xs md:text-sm font-bold text-foreground whitespace-nowrap">
-                        {slot.label}
+                        {time}
                       </span>
                       <button
-                        onClick={() => onRemoveSlot(slot.id)}
+                        onClick={() => onRemoveSlot(time)}
                         className="text-muted-foreground/30 hover:text-destructive transition-colors ml-1 shrink-0"
                       >
                         <Trash2 size={10} />
                       </button>
                     </div>
                   </td>
-                  {DAYS.map((_, dayIdx) => (
-                    <td key={dayIdx} className="p-0 border border-border/50">
-                      <TaskCell
-                        task={getTask(slot.id, dayIdx)}
-                        onSetTask={(text) => onSetTask(slot.id, dayIdx, text)}
-                        onCycleStatus={() => onCycleStatus(slot.id, dayIdx)}
-                        isAlt={rowIdx % 2 === 1}
-                      />
-                    </td>
-                  ))}
+                  {DAYS.map((day) => {
+                    const dayData = getDayData(day);
+                    const task = dayData[time];
+                    return (
+                      <td key={day} className="p-0 border border-border/50">
+                        <TaskCell
+                          task={task}
+                          onSetTask={(text) => onSetTask(day, time, text)}
+                          onCycleStatus={() => onCycleStatus(day, time)}
+                          isAlt={rowIdx % 2 === 1}
+                        />
+                      </td>
+                    );
+                  })}
                 </motion.tr>
               ))}
             </tbody>

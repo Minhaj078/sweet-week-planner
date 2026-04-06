@@ -1,0 +1,103 @@
+{
+  "users": {
+    "Minhaj078": {
+      "passwordHash": "$2b$10$OGZ.iBzo6g..TGhkRGpKn.IKmiqhjq.NakGG2qmojIjt1G7sWXl8q"
+    }
+  },
+  "workspaces": {
+    "default": {
+      "my": {
+        "timeSlots": [
+          "8-10",
+          "10-11"
+        ],
+        "week": {
+          "Sunday": {
+            "8-10": {
+              "text": "Sleep",
+              "status": "pending"
+            },
+            "10-11": {
+              "text": "Ready",
+              "status": "pending"
+            }
+          },
+          "Monday": {},
+          "Tuesday": {},
+          "Wednesday": {},
+          "Thursday": {},
+          "Friday": {},
+          "Saturday": {}
+        }
+      },
+      "partner": {
+        "timeSlots": [],
+        "week": {
+          "Sunday": {},
+          "Monday": {},
+          "Tuesday": {},
+          "Wednesday": {},
+          "Thursday": {},
+          "Friday": {},
+          "Saturday": {}
+        }
+      }
+    },
+    "Minhaj078": {
+      "my": {
+        "timeSlots": [
+          "8-9",
+          "9-10",
+          "10-1"
+        ],
+        "week": {
+          "Sunday": {
+            "8-9": {
+              "text": "cook",
+              "status": "missed"
+            },
+            "9-10": {
+              "text": "GY<",
+              "status": "missed"
+            },
+            "10-1": {
+              "text": "College",
+              "status": "missed"
+            }
+          },
+          "Monday": {},
+          "Tuesday": {},
+          "Wednesday": {},
+          "Thursday": {},
+          "Friday": {},
+          "Saturday": {}
+        }
+      },
+      "partner": {
+        "timeSlots": [
+          "9-10"
+        ],
+        "week": {
+          "Sunday": {
+            "9-10": {
+              "text": "Reading",
+              "status": "pending"
+            }
+          },
+          "Monday": {},
+          "Tuesday": {},
+          "Wednesday": {},
+          "Thursday": {},
+          "Friday": {},
+          "Saturday": {}
+        }
+      },
+      "settings": {
+        "title": "Weekly Planner",
+        "subtitle": "Of my MadOm 🎀 Content creator",
+        "myTab": "💕 My Routine",
+        "partnerTab": "Madom Ji"
+      }
+    }
+  }
+}

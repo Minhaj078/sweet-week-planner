@@ -1,59 +1,168 @@
-import { useState, useCallback } from 'react';
-import { TimeSlot, PlannerTask, PlannerView, TaskStatus, DEFAULT_TIME_SLOTS } from '@/types/planner';
+import { useState, useCallback, useEffect } from 'react';
+import { io, Socket } from 'socket.io-client';
+import { AppState, PlannerView, TaskStatus, PlannerSettings } from '@/types/planner';
 
-const generateId = () => Math.random().toString(36).substring(2, 9);
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
+export const socket: Socket = io(API_URL, { autoConnect: false });
 
-const makeSlots = (): TimeSlot[] => DEFAULT_TIME_SLOTS.map(s => ({ ...s, id: generateId() }));
+const INITIAL_STATE: AppState = {
+  my: { timeSlots: [], week: { Sunday: {}, Monday: {}, Tuesday: {}, Wednesday: {}, Thursday: {}, Friday: {}, Saturday: {} } },
+  partner: { timeSlots: [], week: { Sunday: {}, Monday: {}, Tuesday: {}, Wednesday: {}, Thursday: {}, Friday: {}, Saturday: {} } },
+  settings: {
+    title: "Weekly Planner",
+    subtitle: "Of my MadOm 🎀 Content creator",
+    myTab: "💕 My Routine",
+    partnerTab: "💝 Partner"
+  }
+};
 
 export function usePlannerState() {
   const [view, setView] = useState<PlannerView>('my');
-  const [timeSlots, setTimeSlots] = useState<Record<PlannerView, TimeSlot[]>>({
-    my: makeSlots(),
-    partner: makeSlots(),
-  });
-  const [tasks, setTasks] = useState<Record<PlannerView, PlannerTask[]>>({
-    my: [],
-    partner: [],
-  });
+  const [appState, setAppState] = useState<AppState>(INITIAL_STATE);
+  const [isConnected, setIsConnected] = useState(false);
 
-  const slots = timeSlots[view];
-  const currentTasks = tasks[view];
-
-  const addTimeSlot = useCallback((label: string) => {
-    const slot: TimeSlot = { id: generateId(), label };
-    setTimeSlots(prev => ({ ...prev, [view]: [...prev[view], slot] }));
-  }, [view]);
-
-  const removeTimeSlot = useCallback((id: string) => {
-    setTimeSlots(prev => ({ ...prev, [view]: prev[view].filter(s => s.id !== id) }));
-    setTasks(prev => ({ ...prev, [view]: prev[view].filter(t => t.timeSlotId !== id) }));
-  }, [view]);
-
-  const setTask = useCallback((timeSlotId: string, day: number, text: string) => {
-    setTasks(prev => {
-      const filtered = prev[view].filter(t => !(t.timeSlotId === timeSlotId && t.day === day));
-      if (!text.trim()) return { ...prev, [view]: filtered };
-      return { ...prev, [view]: [...filtered, { timeSlotId, day, text, status: 'pending' }] };
+  useEffect(() => {
+    socket.on('connect_error', (err) => {
+        console.error('Socket connect error:', err.message);
     });
-  }, [view]);
 
-  const cycleStatus = useCallback((timeSlotId: string, day: number) => {
-    setTasks(prev => {
-      const updated = prev[view].map(t => {
-        if (t.timeSlotId === timeSlotId && t.day === day) {
-          const order: TaskStatus[] = ['pending', 'completed', 'missed'];
-          const next = order[(order.indexOf(t.status) + 1) % 3];
-          return { ...t, status: next };
+    socket.on('connect', () => setIsConnected(true));
+    socket.on('disconnect', () => setIsConnected(false));
+    
+    socket.on('initial-state', (state: AppState) => {
+      setAppState(state);
+    });
+
+    socket.on('state-changed', (data: { user: PlannerView, type: string, payload: any }) => {
+      setAppState(prev => {
+        const newState = { ...prev };
+        
+        if (data.type === 'update-settings') {
+          newState.settings = data.payload;
+          return newState;
         }
-        return t;
+
+        const userState = { ...newState[data.user], week: { ...newState[data.user].week } };
+
+        if (data.type === 'update-task') {
+          const { day, time, task } = data.payload;
+          userState.week[day] = { ...userState.week[day] };
+          if (task === null) {
+            delete userState.week[day][time];
+          } else {
+            userState.week[day][time] = task;
+          }
+        } else if (data.type === 'add-slot') {
+          if (!userState.timeSlots.includes(data.payload.time)) {
+            userState.timeSlots = [...userState.timeSlots, data.payload.time];
+          }
+        } else if (data.type === 'remove-slot') {
+          userState.timeSlots = userState.timeSlots.filter(t => t !== data.payload.time);
+          for (const day in userState.week) {
+             const newDay = { ...userState.week[day] };
+             delete newDay[data.payload.time];
+             userState.week[day] = newDay;
+          }
+        }
+
+        newState[data.user] = userState;
+        return newState;
       });
-      return { ...prev, [view]: updated };
+    });
+
+    const token = localStorage.getItem('planner_token');
+    if (token) {
+      const auth = socket.auth as { token?: string };
+      if (socket.connected && auth?.token !== token) {
+        socket.disconnect();
+      }
+      
+      if (!socket.connected) {
+        socket.auth = { token };
+        socket.connect();
+      }
+    }
+
+    return () => {
+      socket.off('connect_error');
+      socket.off('connect');
+      socket.off('disconnect');
+      socket.off('initial-state');
+      socket.off('state-changed');
+    };
+  }, []);
+
+  const addTimeSlot = useCallback((time: string) => {
+    socket.emit('db-action', { user: view, type: 'add-slot', payload: { time } });
+    setAppState(prev => {
+      if (prev[view].timeSlots.includes(time)) return prev;
+      return {
+        ...prev,
+        [view]: { ...prev[view], timeSlots: [...prev[view].timeSlots, time] }
+      };
     });
   }, [view]);
 
-  const getTask = useCallback((timeSlotId: string, day: number) => {
-    return currentTasks.find(t => t.timeSlotId === timeSlotId && t.day === day);
-  }, [currentTasks]);
+  const removeTimeSlot = useCallback((time: string) => {
+    socket.emit('db-action', { user: view, type: 'remove-slot', payload: { time } });
+    setAppState(prev => {
+      const nb = { ...prev };
+      const u = { ...nb[view], week: { ...nb[view].week } };
+      u.timeSlots = u.timeSlots.filter(t => t !== time);
+      for (const day in u.week) {
+         const newDay = { ...u.week[day] };
+         delete newDay[time];
+         u.week[day] = newDay;
+      }
+      nb[view] = u;
+      return nb;
+    });
+  }, [view]);
 
-  return { view, setView, slots, addTimeSlot, removeTimeSlot, setTask, cycleStatus, getTask };
+  const setTask = useCallback((day: string, time: string, text: string) => {
+    const task = !text.trim() ? null : { text, status: 'pending' as TaskStatus };
+    socket.emit('db-action', { user: view, type: 'update-task', payload: { day, time, task } });
+    
+    setAppState(prev => {
+      const nb = { ...prev };
+      const updatedWeek = { ...nb[view].week };
+      const updatedDay = { ...updatedWeek[day] };
+      if (!task) delete updatedDay[time]; else updatedDay[time] = task;
+      updatedWeek[day] = updatedDay;
+      nb[view] = { ...nb[view], week: updatedWeek };
+      return nb;
+    });
+  }, [view]);
+
+  const cycleStatus = useCallback((day: string, time: string) => {
+    setAppState(prev => {
+      const task = prev[view].week[day]?.[time];
+      if (!task) return prev;
+      
+      const order: TaskStatus[] = ['pending', 'completed', 'missed'];
+      const next = order[(order.indexOf(task.status) + 1) % 3];
+      
+      const newTask = { ...task, status: next };
+      socket.emit('db-action', { user: view, type: 'update-task', payload: { day, time, task: newTask } });
+
+      const nb = { ...prev };
+      const updatedWeek = { ...nb[view].week };
+      updatedWeek[day] = { ...updatedWeek[day], [time]: newTask };
+      nb[view] = { ...nb[view], week: updatedWeek };
+      return nb;
+    });
+  }, [view]);
+
+  const updateSettings = useCallback((settings: PlannerSettings) => {
+    socket.emit('db-action', { user: view, type: 'update-settings', payload: settings });
+    setAppState(prev => ({ ...prev, settings }));
+  }, [view]);
+
+  return { 
+    view, setView, cycleStatus, setTask, addTimeSlot, removeTimeSlot, updateSettings,
+    settings: appState.settings,
+    slots: appState[view].timeSlots,
+    getDayData: (day: string) => appState[view].week[day] || {},
+    isConnected 
+  };
 }

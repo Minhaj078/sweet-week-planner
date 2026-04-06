@@ -7,16 +7,27 @@ import { AddTimeSlotModal } from '@/components/AddTimeSlotModal';
 import { usePlannerState } from '@/hooks/usePlannerState';
 
 const Index = () => {
-  const { view, setView, slots, addTimeSlot, removeTimeSlot, setTask, cycleStatus, getTask } = usePlannerState();
+  const { view, setView, slots, addTimeSlot, removeTimeSlot, setTask, cycleStatus, getDayData, isConnected, settings, updateSettings } = usePlannerState();
   const [showAddSlot, setShowAddSlot] = useState(false);
 
   return (
     <div className="min-h-screen bg-background">
-      <PlannerHeader view={view} onViewChange={setView} />
+      <PlannerHeader 
+        view={view} 
+        onViewChange={setView} 
+        settings={settings}
+        onUpdateSettings={updateSettings} 
+      />
+      
+      {!isConnected && (
+         <div className="bg-red-500/20 text-red-600 text-center text-xs py-1 font-body">
+           Reconnecting to server... changes will be saved locally.
+         </div>
+      )}
 
       <WeeklyGrid
         slots={slots}
-        getTask={getTask}
+        getDayData={getDayData}
         onSetTask={setTask}
         onCycleStatus={cycleStatus}
         onRemoveSlot={removeTimeSlot}
